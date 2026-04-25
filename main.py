@@ -43,6 +43,13 @@ df['label'] = df['label'].map({'ham': 0, 'spam': 1})
 # Create cleaning function to remove special characters and number from the text.
 def clean_text(text):
     text = text.lower() # Conver text to lowercase.
+
+    # DOMAIN KEYWORDS (VERY IMPORTANT)
+    sensitive_keywords = ["password", "otp", "bank", "account", "pin", "ssn"]
+    for word in sensitive_keywords:
+        if word in text:
+            text += " sensitive"
+
     text = re.sub(r'[^a-zA-Z]', ' ', text) # Remove special characters and numbers, keep only letters.
     return text
 
@@ -60,7 +67,8 @@ df['text'] = df['text'].apply(clean_text)
 # Replacing the older code with this new code:
 vectorizer = TfidfVectorizer(
     stop_words = 'english', # removes useless words that add noise.
-    max_features = 5000 # limits word importance to 5000.
+    max_features = 5000, # limits word importance to 5000.
+    ngram_range=(1,2) # now it can identify pair of words too. e.g. 2gram = password is, your password.
 )
 
 x = vectorizer.fit_transform(df['text']) # Convert the 'text' column into a matrix of TF-IDF features.
@@ -162,4 +170,24 @@ y_pred = model.predict(x_test)
 # o/p: 
 # o/p:     accuracy                           0.98      1115
 # o/p:    macro avg       0.98      0.95      0.96      1115
+# o/p: weighted avg       0.98      0.98      0.98      1115
+
+# print(classification_report(y_test, y_pred))
+# o/p:               precision    recall  f1-score   support
+# o/p: 
+# o/p:            0       0.98      0.99      0.99       965
+# o/p:            1       0.93      0.90      0.92       150
+# o/p: 
+# o/p:     accuracy                           0.98      1115
+# o/p:    macro avg       0.96      0.94      0.95      1115
+# o/p: weighted avg       0.98      0.98      0.98      1115
+
+# print(classification_report(y_test, y_pred))
+# o/p:               precision    recall  f1-score   support
+# o/p: 
+# o/p:            0       0.98      0.99      0.99       965
+# o/p:            1       0.93      0.90      0.92       150
+# o/p: 
+# o/p:     accuracy                           0.98      1115
+# o/p:    macro avg       0.96      0.94      0.95      1115
 # o/p: weighted avg       0.98      0.98      0.98      1115
